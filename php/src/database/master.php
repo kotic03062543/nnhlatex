@@ -137,17 +137,29 @@ function SavePpPurchaseInfo($userId, $weighed, $percentage, $rubberDry, $priceTo
     // Get the current local timestamp
     $localTimestamp = date('Y-m-d H:i:s');
 
+    // Use prepared statement to prevent SQL injection
     $sql = "INSERT INTO pp_purchase_info (user_id, weighed, percentage, rubber_dry, price_total, create_date) 
-            VALUES ('$userId', '$weighed', '$percentage', '$rubberDry', '$priceTotal', '$localTimestamp')";
+            VALUES (?, ?, ?, ?, ?, ?)";
 
-    if ($conn->query($sql)) {
-        // Insertion successful
-        return null;
+    $stmt = $conn->prepare($sql);
+
+    if ($stmt) {
+        $stmt->bind_param("isssss", $userId, $weighed, $percentage, $rubberDry, $priceTotal, $localTimestamp);
+
+        if ($stmt->execute()) {
+            // Insertion successful
+            $stmt->close();
+            return 1;
+        } else {
+            // An error occurred during insertion
+            $stmt->close();
+            return "Error: " . $stmt->error;
+        }
     } else {
-        // An error occurred during insertion
-        return $conn->error;
+        return "Error in prepared statement: " . $conn->error;
     }
 }
+
 
 
 function getPpPurchaseInfo($date)
@@ -173,7 +185,7 @@ function getPpPurchaseInfo($date)
     $purchaseInfo = [];
 
     if ($result->num_rows > 0) {
-        
+
         while ($row = $result->fetch_assoc()) {
             $purchaseInfo[] = $row;
         }
@@ -214,29 +226,4 @@ function sweetAlertWithRedirect($title, $message, $icon, $location)
                 }
             });
           </script>";
-}
-
-function createPlaceholderCard($color): string
-{
-    return <<<HTML
-    <div class="col-xl-3 col-md-6 mb-4 hover-card" data-toggle="modal" data-target="#myModal">
-        <div class="card border-left-{$color} shadow h-100 py-2">
-            <div class="card-body">
-                <div class="row no-gutters align-items-center">
-                    <div class="col mr-2">
-                        <div class="text-xs font-weight-bold text-{$color} text-uppercase mb-1">
-                            Please click insert price today
-                        </div>
-                        <div class="h5 mb-0 font-weight-bold text-gray-800">
-                            Click here
-                        </div>
-                    </div>
-                    <div class="col-auto">
-                        <i class="fas fa-calendar fa-2x text-gray-300"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    HTML;
 }

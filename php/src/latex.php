@@ -2,23 +2,67 @@
 
 require_once 'database/master.php';
 
+$users = getUsers();
+
 $categories = getFreshLatexCategories();
 
-if (isset($_POST['submit'])) {
-    $price = $_POST['price'];
-    $price_unit_eng = $_POST['price_unit_eng'];
-    $price_unit_loc = $_POST['price_unit_loc'];
-    $weight_unit_eng = $_POST['weight_unit_eng'];
-    $weight_unit_loc = $_POST['weight_unit_loc'];
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    // Retrieve form data
+    $userSelection = $_POST["userSelection"];
+    $freshLatexWeight = $_POST["freshLatexWeight"];
+    $percentageObtained = isset($_POST["percentageObtained"]) ? $_POST["percentageObtained"] : 0;
+    $dryRubber = $_POST["dryRubber"];
+    $totalPrice = $_POST["totalPrice"];
 
-    $result = insertFreshLatexCategory($price, $price_unit_eng, $price_unit_loc, $weight_unit_eng, $weight_unit_loc);
-
-    if ($result === true) {
-        header('Location: latex.php');
+    // Check if any of the fields are empty
+    if (empty($userSelection) || empty($freshLatexWeight) || empty($dryRubber) || empty($totalPrice)) {
+        echo "<script>
+                    alert('กรุณากด Calculate ก่อน.');
+                    window.location.href = 'latex.php';
+                </script>";
     } else {
-        echo $result;
+        // Save data to the database
+        $result = SavePpPurchaseInfo($userSelection, $freshLatexWeight, $percentageObtained, $dryRubber, $totalPrice);
+
+        if ($result == 1) {
+            header("Refresh:0");
+        } else {
+            echo "<script>
+                        alert('Error: $result');
+                        window.location.href = 'latex.php';
+                    </script>";
+        }
     }
 }
+
+
+
+// if (isset($_POST['submit'])) {
+//     $price = $_POST['price'];
+//     $price_unit_eng = $_POST['price_unit_eng'];
+//     $price_unit_loc = $_POST['price_unit_loc'];
+//     $weight_unit_eng = $_POST['weight_unit_eng'];
+//     $weight_unit_loc = $_POST['weight_unit_loc'];
+
+//     $result = insertFreshLatexCategory($price, $price_unit_eng, $price_unit_loc, $weight_unit_eng, $weight_unit_loc);
+
+//     if ($result === true) {
+//         echo "<script>
+//                     Swal.fire({
+//                         title: 'Success!',
+//                         text: 'Data inserted successfully.',
+//                         icon: 'success',
+//                         showCancelButton: false,
+//                         confirmButtonText: 'OK'
+//                     }).then(() => {
+//                         window.location.href = 'index.php';
+//                     });
+//                 </script>";
+//     } else {
+//         echo $result;
+//         // echo "<script>Swal.fire('Error!', '$error', 'error');</script>";
+//     }
+// }
 
 ?>
 
@@ -40,11 +84,20 @@ if (isset($_POST['submit'])) {
     <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
     <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
 
+    <!-- SweetAlert CSS -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+
+    <!-- SweetAlert JS -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <!-- Custom styles for this template -->
-    <link href="css/sb-admin-2.min.css" rel="stylesheet">
+    <link href="css/sb.min.css" rel="stylesheet">
 
     <!-- Custom styles for this page -->
     <link href="vendor/datatables/dataTables.bootstrap4.min.css" rel="stylesheet">
+
+    <!-- Custom styles for this page -->
+    <link href="css/style.css" rel="stylesheet">
 
 </head>
 
@@ -72,8 +125,60 @@ if (isset($_POST['submit'])) {
 
                     <!-- Page Heading -->
                     <h1 class="h3 mb-2 text-gray-800">Tables</h1>
-                    <p class="mb-4">DataTables is a third party plugin that is used to generate the demo table below.
-                        For more information about DataTables, please visit the <a target="_blank" href="https://datatables.net">official DataTables documentation</a>.</p>
+                    <p class="mb-4">Insert Example.</p>
+
+                    <!-- Insert form -->
+                    <form class="user" method="post" action="">
+                        <div class="form-group">
+                            <label for="pricePerKilogram">ราคาน้ำยางวันนี้ (Bath)</label>
+                            <?php $selectedCategory = (!empty($categories)) ? $categories[0] : null; ?>
+                            <input type="text" class="form-control" id="pricePerKilogram" name="pricePerKilogram" value="<?php echo htmlspecialchars($selectedCategory['price'] ?? '0'); ?>" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="userSelection">เลือกลูกค้า</label>
+                            <select class="form-control" id="userSelection" name="userSelection" placeholder="Select User" required>
+                                <?php foreach ($users as $user) : ?>
+                                    <option value="<?php echo $user['id']; ?>"><?php echo htmlspecialchars($user['username']); ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+
+                        <div class="form-group row">
+                            <div class="col-sm-6 mb-3 mb-sm-0">
+                                <label for="freshLatexWeight">น้ำหนักน้ำยางสด (Kilogram)</label>
+                                <input type="text" class="form-control" id="freshLatexWeight" name="freshLatexWeight" placeholder="Enter weight" required>
+                            </div>
+
+                            <div class="col-sm-6">
+                                <label for="percentageObtained">เปอร์เซ็นต์ที่ทำได้ (%)</label>
+                                <input type="text" class="form-control" id="percentageObtained" name="percentageObtained" placeholder="Enter percentage" required>
+                            </div>
+                        </div>
+
+                        <!-- Calculated fields for reference -->
+                        <div class="form-group row">
+                            <div class="col-sm-6 mb-3 mb-sm-0">
+                                <label>ยางแห้ง</label>
+                                <input type="text" class="form-control" id="dryRubber" name="dryRubber" readonly required>
+                            </div>
+                            <div class="col-sm-6">
+                                <label>จำนวนเงินที่ได้รับ (Bath)</label>
+                                <input type="text" class="form-control" id="totalPrice" name="totalPrice" readonly required>
+                            </div>
+                        </div>
+
+                        <button type="button" class="btn btn-primary btn-block" onclick="calculateValues();" id="calculateButton">
+                            Calculate
+                        </button>
+                        <button type="submit" class="btn btn-success btn-block" onclick="saveData();" id="saveButton">
+                            Save
+                        </button>
+
+
+                    </form>
+
+                    <!-- End of insert form -->
 
                     <!-- DataTales Example -->
                     <div class="card shadow mb-4">
@@ -164,6 +269,9 @@ if (isset($_POST['submit'])) {
 
     <!-- Page level custom scripts -->
     <script src="js/demo/datatables-demo.js"></script>
+
+    <!-- Calculate values -->
+    <script src="js/service.js"></script>
 
 </body>
 

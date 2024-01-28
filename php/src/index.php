@@ -1,5 +1,6 @@
 <?php
 require_once 'database/master.php';
+require_once 'database/templete.php';
 
 // Get Users
 $users = getUsers();
@@ -88,46 +89,42 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         <!-- Earnings (Monthly) Card Example -->
                         <?php
                         $cardColors = ['primary', 'success', 'info', 'warning'];
-                        $colorIndex = 0;
+                        $colorIndex = 0; // Initialize $colorIndex here
 
-                        foreach ($categories as $cat) :
+                        if (!empty($categories)) {
+                            foreach ($categories as $cat) :
                         ?>
-                            <div class="col-xl-3 col-md-6 mb-4" data-toggle="modal" data-target="#myModal">
-                                <div class="card border-left-<?php echo $cardColors[$colorIndex]; ?> shadow h-100 py-2">
-                                    <div class="card-body">
-                                        <div class="row no-gutters align-items-center">
-                                            <div class="col mr-2">
-                                                <div class="text-xs font-weight-bold text-<?php echo $cardColors[$colorIndex]; ?> text-uppercase mb-1">
-                                                    Purchase price of fresh latex as of
-                                                    <?php
-                                                    $formattedDate = date('Y-m-d', strtotime($cat['create_date']));
-                                                    echo htmlspecialchars($formattedDate);
-                                                    ?>
+                                <div class="col-xl-3 col-md-6 mb-4 hover-card" data-toggle="modal" data-target="#myModal">
+                                    <div class="card border-left-<?php echo $cardColors[$colorIndex]; ?> shadow h-100 py-2">
+                                        <div class="card-body">
+                                            <div class="row no-gutters align-items-center">
+                                                <div class="col mr-2">
+                                                    <div class="text-xs font-weight-bold text-<?php echo $cardColors[$colorIndex]; ?> text-uppercase mb-1">
+                                                        Purchase price of Date <?php echo date('Y-m-d', strtotime($cat['create_date'])); ?>
+                                                    </div>
+                                                    <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                                        <?php echo $cat['price']; ?>
+                                                    </div>
                                                 </div>
-                                                <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                                    <?php echo htmlspecialchars($cat['price']); ?>
-                                                    <span class="">
-                                                        <?php echo htmlspecialchars($cat['price_unit_eng']); ?>
-                                                    </span>
+                                                <div class="col-auto">
+                                                    <i class="fas fa-calendar fa-2x text-gray-300"></i>
                                                 </div>
-                                            </div>
-                                            <div class="col-auto">
-                                                <i class="fas fa-calendar fa-2x text-gray-300"></i>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
 
-
-                            <?php
-                            // Increment the color index and reset it if it exceeds the number of colors
-                            $colorIndex++;
-                            if ($colorIndex >= count($cardColors)) {
-                                $colorIndex = 0;
-                            }
-                            ?>
-                        <?php endforeach; ?>
+                        <?php
+                                $colorIndex++;
+                                if ($colorIndex >= count($cardColors)) {
+                                    $colorIndex = 0;
+                                }
+                            endforeach;
+                        } else {
+                            // Display a placeholder card or a message
+                            echo createPlaceholderCard($cardColors[$colorIndex]);
+                        }
+                        ?>
 
                         <?php
                         include 'modal/insert-price-today.php';
