@@ -1,26 +1,30 @@
 <?php
 require_once 'database/master.php';
 
+// Get Users
 $users = getUsers();
 
+// Call the function to retrieve categories
 $categories = getFreshLatexCategoryLimit();
 
-if (isset($_POST['submit'])) {
-    $price = $_POST['price'];
-    $price_unit_eng = $_POST['price_unit_eng'];
-    $price_unit_loc = $_POST['price_unit_loc'];
-    $weight_unit_eng = $_POST['weight_unit_eng'];
-    $weight_unit_loc = $_POST['weight_unit_loc'];
+// insertFreshLatexCategory
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    if (isset($_POST['price'])) {
+        $price = $_POST['price'];
+        $price_unit_eng = "Bath";
+        $price_unit_loc = "บาท";
+        $weight_unit_eng = "Kilogram";
+        $weight_unit_loc = "กิโลกรัม";
 
-    $result = insertFreshLatexCategory($price, $price_unit_eng, $price_unit_loc, $weight_unit_eng, $weight_unit_loc);
+        $result = insertFreshLatexCategory($price, $price_unit_eng, $price_unit_loc, $weight_unit_eng, $weight_unit_loc);
 
-    if ($result === true) {
-        header('Location: index.php');
-    } else {
-        echo $result;
+        if ($result == 1) {
+            header("Refresh:0");
+        } else {
+            echo $result;
+        }
     }
 }
-
 
 ?>
 
@@ -44,6 +48,9 @@ if (isset($_POST['submit'])) {
 
     <!-- Custom styles for this template-->
     <link href="css/sb.min.css" rel="stylesheet">
+
+    <!-- Custom styles for this page -->
+    <link href="css/style.css" rel="stylesheet">
 
 </head>
 
@@ -98,7 +105,7 @@ if (isset($_POST['submit'])) {
                                                     ?>
                                                 </div>
                                                 <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                                    <?php echo htmlspecialchars($cat['price']); ?> 
+                                                    <?php echo htmlspecialchars($cat['price']); ?>
                                                     <span class="">
                                                         <?php echo htmlspecialchars($cat['price_unit_eng']); ?>
                                                     </span>
@@ -121,6 +128,10 @@ if (isset($_POST['submit'])) {
                             }
                             ?>
                         <?php endforeach; ?>
+
+                        <?php
+                        include 'modal/insert-price-today.php';
+                        ?>
 
                         <!-- Earnings (Monthly) Card Example -->
                         <!-- <div class="col-xl-3 col-md-6 mb-4">
@@ -317,6 +328,7 @@ if (isset($_POST['submit'])) {
     <!-- Page level custom scripts -->
     <script src="js/demo/chart-area-demo.js"></script>
     <script src="js/demo/chart-pie-demo.js"></script>
+
 
 </body>
 

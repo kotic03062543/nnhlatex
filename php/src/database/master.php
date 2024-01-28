@@ -60,7 +60,7 @@ function insertFreshLatexCategory($price, $price_unit_eng, $price_unit_loc, $wei
         return $conn->error;
     }
 
-    return null; // No error
+    return 1; // No error
 }
 
 // update
