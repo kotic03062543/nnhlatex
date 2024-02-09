@@ -2,11 +2,17 @@
 require_once 'database/master.php';
 require_once 'database/templete.php';
 
+date_default_timezone_set('Asia/Bangkok');
+$date = date('Y-m-d');
+
 // Get Users
 $users = getUsers();
 
-// Call the function to retrieve categories
+// Call the function ราคาน้ำยางเเต่ละวัน
 $categories = getFreshLatexCategoryLimit();
+
+// Call the function getSumTotalLatex1Date ยอดรับเข้าวันนี้
+$sumTotalLatex1Date = getSumTotalLatex1Date($date);
 
 // insertFreshLatexCategory
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
@@ -40,7 +46,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <meta name="description" content="">
     <meta name="author" content="">
     <link rel="icon" href="icons/star.png" type="image/x-icon">
-    
+
     <title>Dashboard</title>
 
     <!-- Custom fonts for this template-->
@@ -79,14 +85,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
                     <!-- Page Heading -->
                     <div class="d-sm-flex align-items-center justify-content-between mb-4">
-                        <h1 class="h3 mb-0 text-gray-800">Dashboard</h1>
+                        <h1 class="h3 mb-0 text-gray-800">Summary</h1>
                         <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm"><i class="fas fa-download fa-sm text-white-50"></i> Generate Report</a>
                     </div>
 
                     <!-- Content Row -->
                     <div class="row">
-
-                        <!-- Earnings (Monthly) Card Example -->
+                        <!-- categories price today -->
                         <?php
                         $cardColors = ['primary', 'success', 'info', 'warning'];
                         $colorIndex = 0; // Initialize $colorIndex here
@@ -100,7 +105,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                             <div class="row no-gutters align-items-center">
                                                 <div class="col mr-2">
                                                     <div class="text-xs font-weight-bold text-<?php echo $cardColors[$colorIndex]; ?> text-uppercase mb-1">
-                                                        Purchase price of Date <?php echo date('Y-m-d', strtotime($cat['create_date'])); ?>
+                                                        ราคาน้ำยางวันนี้ <?php echo date('Y-m-d', strtotime($cat['create_date'])); ?>
                                                     </div>
                                                     <div class="h5 mb-0 font-weight-bold text-gray-800">
                                                         <?php echo $cat['price']; ?>
@@ -130,68 +135,78 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         include 'modal/insert-price-today.php';
                         ?>
 
-                        <!-- Earnings (Monthly) Card Example -->
-                        <!-- <div class="col-xl-3 col-md-6 mb-4">
-                                <div class="card border-left-success shadow h-100 py-2">
-                                    <div class="card-body">
-                                        <div class="row no-gutters align-items-center">
-                                            <div class="col mr-2">
-                                                <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
-                                                    Earnings (Annual)</div>
-                                                <div class="h5 mb-0 font-weight-bold text-gray-800">$215,000</div>
+                        <!-- sumTotalLatex1Date weighed-->
+                        <div class="col-xl-3 col-md-6 mb-4 hover-card" data-toggle="modal" data-target="#myModal">
+                            <div class="card border-left-<?php echo $cardColors[$colorIndex]; ?> shadow h-100 py-2">
+                                <div class="card-body">
+                                    <div class="row no-gutters align-items-center">
+                                        <div class="col mr-2">
+                                            <div class="text-xs font-weight-bold text-<?php echo $cardColors[$colorIndex]; ?> text-uppercase mb-1">
+                                                ยอดรับเข้าวันนี้ (<?php echo htmlspecialchars($cat['weight_unit_loc']); ?>)
                                             </div>
-                                            <div class="col-auto">
-                                                <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
+                                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                                <?php echo number_format($sumTotalLatex1Date['weighed'] ?? 0.00, 2); ?>
                                             </div>
+                                        </div>
+                                        <div class="col-auto">
+                                            <i class="fa fa-money" aria-hidden="true"></i>
                                         </div>
                                     </div>
                                 </div>
-                            </div> -->
+                            </div>
+                        </div>
 
-                        <!-- Earnings (Monthly) Card Example -->
-                        <!-- <div class="col-xl-3 col-md-6 mb-4">
-                                <div class="card border-left-info shadow h-100 py-2">
-                                    <div class="card-body">
-                                        <div class="row no-gutters align-items-center">
-                                            <div class="col mr-2">
-                                                <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Tasks
-                                                </div>
-                                                <div class="row no-gutters align-items-center">
-                                                    <div class="col-auto">
-                                                        <div class="h5 mb-0 mr-3 font-weight-bold text-gray-800">50%</div>
-                                                    </div>
-                                                    <div class="col">
-                                                        <div class="progress progress-sm mr-2">
-                                                            <div class="progress-bar bg-info" role="progressbar" style="width: 50%" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100"></div>
-                                                        </div>
-                                                    </div>
-                                                </div>
+                        <!-- sumTotalLatex1Date price_total-->
+                        <div class="col-xl-3 col-md-6 mb-4">
+                            <div class="card border-left-info shadow h-100 py-2">
+                                <div class="card-body">
+                                    <div class="row no-gutters align-items-center">
+                                        <div class="col mr-2">
+                                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                                ยอดจ่ายวันนี้ (<?php echo htmlspecialchars($cat['price_unit_loc']); ?>)
                                             </div>
-                                            <div class="col-auto">
-                                                <i class="fas fa-clipboard-list fa-2x text-gray-300"></i>
+                                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                                <?php echo number_format($sumTotalLatex1Date['price_total'] ?? 0.00, 2); ?>
                                             </div>
+                                            <!-- <div class="row no-gutters align-items-center">
+                                                <div class="col-auto">
+                                                    <div class="h5 mb-0 mr-3 font-weight-bold text-gray-800">50%</div>
+                                                </div>
+                                                <div class="col">
+                                                    <div class="progress progress-sm mr-2">
+                                                        <div class="progress-bar bg-info" role="progressbar" style="width: 50%" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100"></div>
+                                                    </div>
+                                                </div>
+                                            </div> -->
+                                        </div>
+                                        <div class="col-auto">
+                                            <i class="fas fa-clipboard-list fa-2x text-gray-300"></i>
                                         </div>
                                     </div>
                                 </div>
-                            </div> -->
+                            </div>
+                        </div>
 
                         <!-- Pending Requests Card Example -->
-                        <!-- <div class="col-xl-3 col-md-6 mb-4">
-                                <div class="card border-left-warning shadow h-100 py-2">
-                                    <div class="card-body">
-                                        <div class="row no-gutters align-items-center">
-                                            <div class="col mr-2">
-                                                <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
-                                                    Pending Requests</div>
-                                                <div class="h5 mb-0 font-weight-bold text-gray-800">18</div>
+                        <div class="col-xl-3 col-md-6 mb-4">
+                            <div class="card border-left-warning shadow h-100 py-2">
+                                <div class="card-body">
+                                    <div class="row no-gutters align-items-center">
+                                        <div class="col mr-2">
+                                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+
                                             </div>
-                                            <div class="col-auto">
-                                                <i class="fas fa-comments fa-2x text-gray-300"></i>
+                                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+
                                             </div>
+                                        </div>
+                                        <div class="col-auto">
+                                            <!-- <i class="fas fa-comments fa-2x text-gray-300"></i> -->
                                         </div>
                                     </div>
                                 </div>
-                            </div> -->
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Content Row -->

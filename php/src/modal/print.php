@@ -1,4 +1,4 @@
-<div class="modal fade" id="printModal<?php echo $info['id']; ?>" tabindex="-1" role="dialog" aria-labelledby="printModalLabel" aria-hidden="true">
+<div class="modal fade" id="printModal" tabindex="-1" role="dialog" aria-labelledby="printModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
@@ -13,8 +13,9 @@
                         <h2>ใบเสร็จ</h2>
                     </div>
                     <div class="info">
-                        <p><strong>ชื่อลูกค้า:</strong> <?php echo $info['username']; ?></p>
-                        <p><strong>วันที่:</strong> <?php echo $info['create_date']; ?></p>
+                        <p><strong>เลขที่ใบเสร็จ:</strong> <?php echo htmlspecialchars($info['id']); ?></p>
+                        <p><strong>ชื่อลูกค้า:</strong> <?php echo htmlspecialchars($info['username']); ?></p>
+                        <p><strong>วันที่:</strong> <?php echo htmlspecialchars($info['create_date']); ?></p>
                     </div>
 
                     <table class="items">
@@ -27,14 +28,14 @@
                         </thead>
                         <tbody>
                             <tr>
-                                <td><?php echo $info['weighed']; ?></td>
-                                <td><?php echo $info['percentage']; ?></td>
-                                <td><?php echo $info['price_total']; ?></td>
+                                <td><?php echo htmlspecialchars(number_format($info['weighed'], 2)); ?></td>
+                                <td><?php echo htmlspecialchars(number_format($info['percentage'], 2)); ?></td>
+                                <td><?php echo htmlspecialchars(number_format($info['price_total'], 2)); ?></td>
                             </tr>
                         </tbody>
                     </table>
                     <div class="total">
-                        <p><strong>ยอดรวม:</strong> <?php echo $info['price_total']; ?></p>
+                        <p><strong>ยอดรวม:</strong> <?php echo htmlspecialchars(number_format($info['price_total'], 2)); ?></p>
                     </div>
                 </div>
             </div>

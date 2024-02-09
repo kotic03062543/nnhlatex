@@ -40,35 +40,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 }
 
-
-
-// if (isset($_POST['submit'])) {
-//     $price = $_POST['price'];
-//     $price_unit_eng = $_POST['price_unit_eng'];
-//     $price_unit_loc = $_POST['price_unit_loc'];
-//     $weight_unit_eng = $_POST['weight_unit_eng'];
-//     $weight_unit_loc = $_POST['weight_unit_loc'];
-
-//     $result = insertFreshLatexCategory($price, $price_unit_eng, $price_unit_loc, $weight_unit_eng, $weight_unit_loc);
-
-//     if ($result === true) {
-//         echo "<script>
-//                     Swal.fire({
-//                         title: 'Success!',
-//                         text: 'Data inserted successfully.',
-//                         icon: 'success',
-//                         showCancelButton: false,
-//                         confirmButtonText: 'OK'
-//                     }).then(() => {
-//                         window.location.href = 'index.php';
-//                     });
-//                 </script>";
-//     } else {
-//         echo $result;
-//         // echo "<script>Swal.fire('Error!', '$error', 'error');</script>";
-//     }
-// }
-
 ?>
 
 <!DOCTYPE html>
@@ -216,22 +187,37 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                                 <td>
                                                     <a href="edit.php?id=<?php echo $info['id']; ?>" class="btn btn-primary btn-sm">Edit</a>
                                                     <a href="delete.php?id=<?php echo $info['id']; ?>" class="btn btn-danger btn-sm">Delete</a>
-                                                    <button class="btn btn-success btn-sm" data-toggle="modal" data-target="#printModal<?php echo $info['id']; ?>">Print</button>
+                                                    <button class="btn btn-success btn-sm print-button" data-id="<?php echo $info['id']; ?>">Print</button>
                                                 </td>
                                             </tr>
-
-
                                         <?php endforeach; ?>
-                                    </tbody>
-                                    <!-- modal print receipt -->
-                                    <?php
-                                    foreach ($purchaseInfo as $info) :
-                                        include 'modal/print.php';
-                                    endforeach;
-                                    ?>
-                                    <!-- end modal print receipt -->
 
+                                    </tbody>
                                 </table>
+
+                                <!-- Modal Print Receipt -->
+                                <?php include 'modal/print.php'; ?>
+                                <!-- End Modal Print Receipt -->
+
+                                <script>
+                                    document.addEventListener("DOMContentLoaded", function() {
+                                        var printButtons = document.querySelectorAll(".print-button");
+                                        printButtons.forEach(function(button) {
+                                            button.addEventListener("click", function() {
+                                                var purchaseId = this.getAttribute("data-id");
+                                                fetch("modal/print.php?id=" + purchaseId)
+                                                    .then(response => response.text())
+                                                    .then(data => {
+                                                        $("#printModalBody").html(data);
+                                                        $("#printModal").modal("show");
+                                                    });
+
+                                                console.log(purchaseId);
+                                            });
+                                        });
+                                    });
+                                </script>
+
                             </div>
                         </div>
                     </div>

@@ -24,6 +24,7 @@ function getUsers()
     return $users;
 }
 
+// ger pp_fresh_latex ราคาน้ำยางเเต่ละวัน
 function getFreshLatexCategories()
 {
     global $conn;
@@ -194,6 +195,61 @@ function getPpPurchaseInfo($date)
     return $purchaseInfo;
 }
 
+function getPpPurchaseInfoById($date, $id)
+{
+    global $conn;
+
+    // Escape the date value and enclose it in single quotes
+    $escapedDate = $conn->real_escape_string($date);
+    $id = $conn->real_escape_string($id);
+
+    $sql = "SELECT pi.id, pi.weighed, pi.percentage, pi.rubber_dry, pi.price_total, pi.create_date, pu.username, pu.email
+            FROM pp_purchase_info as pi
+            LEFT JOIN pp_users as pu
+            ON pi.user_id = pu.id
+            WHERE DATE(pi.create_date) = DATE('$escapedDate') 
+            AND pi.id = $id
+            ORDER BY pi.create_date DESC";
+
+    $result = $conn->query($sql);
+
+    if (!$result) {
+        die("Error in SQL query: " . $conn->error);
+    }
+
+    $row = $result->fetch_assoc();
+
+    return $row;
+}
+
+
+function getSumTotalLatex1Date($date)
+{
+    global $conn;
+
+    $escapedDate = $conn->real_escape_string($date);
+
+    $sql = "SELECT SUM(pui.weighed) as weighed,
+                   SUM(pui.price_total) as price_total
+            FROM `pp_purchase_info` as pui
+            LEFT JOIN `pp_users` as pus
+            ON pui.user_id = pus.id
+            WHERE DATE(pui.create_date) = DATE('$escapedDate');";
+
+    $result = $conn->query($sql);
+
+    if (!$result) {
+        die("Error in SQL query: " . $conn->error);
+    }
+
+    // Fetch the first (and only) row directly without looping
+    $row = $result->fetch_assoc();
+
+    // Free the result set
+    $result->free();
+
+    return $row;
+}
 
 
 // msg alert success & error ใช้ javascript แสดงผล
