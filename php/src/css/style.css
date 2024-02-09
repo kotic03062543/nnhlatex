@@ -1,3 +1,37 @@
 .hover-card:hover {
-    cursor: pointer;
+  cursor: pointer;
+}
+.receipt {
+  width: auto;
+  margin: 0 auto;
+  border: 1px solid #ccc;
+  padding: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.info {
+  margin-bottom: 10px;
+}
+
+.items {
+  border-collapse: collapse;
+  width: 100%;
+  margin-bottom: 10px;
+}
+
+.items th,
+.items td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+}
+
+.total {
+  text-align: right;
+  font-weight: bold;
 }

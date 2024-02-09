@@ -39,8 +39,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="description" content="">
     <meta name="author" content="">
-    <link rel="icon" href="img/logo.png" type="image/icon type">
-
+    <link rel="icon" href="icons/star.png" type="image/x-icon">
+    
     <title>Dashboard</title>
 
     <!-- Custom fonts for this template-->

@@ -6,6 +6,11 @@ $users = getUsers();
 
 $categories = getFreshLatexCategories();
 
+date_default_timezone_set('Asia/Bangkok');
+$date = date('Y-m-d');
+
+$purchaseInfo = getPpPurchaseInfo($date);
+
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Retrieve form data
     $userSelection = $_POST["userSelection"];
@@ -78,7 +83,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <meta name="author" content="">
 
 
-    <title>Insert</title>
+    <title>Latex</title>
 
     <!-- Custom fonts for this template -->
     <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
@@ -181,7 +186,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     <!-- End of insert form -->
 
                     <!-- DataTales Example -->
-                    <div class="card shadow mb-4">
+                    <div class="card shadow my-4">
                         <div class="card-header py-3">
                             <h6 class="m-0 font-weight-bold text-primary">DataTables Example</h6>
                         </div>
@@ -190,29 +195,46 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                 <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
                                     <thead>
                                         <tr>
-                                            <th>Name</th>
-                                            <th>Position</th>
-                                            <th>Office</th>
-                                            <th>Age</th>
-                                            <th>Start date</th>
-                                            <th>Salary</th>
+                                            <th>วันที่</th>
+                                            <th>ชื่อลูกค้า</th>
+                                            <th>น้ำหนักน้ำยางสด</th>
+                                            <th>เปอร์เซ็นต์ที่ทำได้</th>
+                                            <th>ยางแห้ง</th>
+                                            <th>ยอดเงินที่ต้องจ่าย</th>
+                                            <th>การทำงาน</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <tr>
-                                            <td>Tiger Nixon</td>
-                                            <td>System Architect</td>
-                                            <td>Edinburgh</td>
-                                            <td>61</td>
-                                            <td>2011/04/25</td>
-                                            <td>$320,800</td>
-                                        </tr>
+                                        <?php foreach ($purchaseInfo as $info) : ?>
+                                            <tr>
+                                                <td><?php echo htmlspecialchars($info['create_date']); ?></td>
+                                                <td><?php echo htmlspecialchars($info['username']); ?></td>
+                                                <td><?php echo htmlspecialchars(number_format($info['weighed'], 2)); ?></td>
+                                                <td><?php echo htmlspecialchars(number_format($info['percentage'], 2)); ?></td>
+                                                <td><?php echo htmlspecialchars(number_format($info['rubber_dry'], 2)); ?></td>
+                                                <td><?php echo htmlspecialchars(number_format($info['price_total'], 2)); ?></td>
+                                                <td>
+                                                    <a href="edit.php?id=<?php echo $info['id']; ?>" class="btn btn-primary btn-sm">Edit</a>
+                                                    <a href="delete.php?id=<?php echo $info['id']; ?>" class="btn btn-danger btn-sm">Delete</a>
+                                                    <button class="btn btn-success btn-sm" data-toggle="modal" data-target="#printModal<?php echo $info['id']; ?>">Print</button>
+                                                </td>
+                                            </tr>
+
+
+                                        <?php endforeach; ?>
                                     </tbody>
+                                    <!-- modal print receipt -->
+                                    <?php
+                                    foreach ($purchaseInfo as $info) :
+                                        include 'modal/print.php';
+                                    endforeach;
+                                    ?>
+                                    <!-- end modal print receipt -->
+
                                 </table>
                             </div>
                         </div>
                     </div>
-
                 </div>
                 <!-- /.container-fluid -->
 
